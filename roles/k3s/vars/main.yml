@@ -1,0 +1,3 @@
+postgres_user: "rancher"
+postgres_password: "SuperSecretPassword1"
+postgres_endpoint: "database.homelab.phil:5432"

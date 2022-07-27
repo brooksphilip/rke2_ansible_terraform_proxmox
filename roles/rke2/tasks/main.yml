@@ -1,0 +1,36 @@
+---
+
+- import_tasks: yum.yml
+
+- import_tasks: master-config.yml
+  when: "'ec2instancesinitmaster' in group_names"
+
+- import_tasks: agent-config.yml
+  when: "'ec2instancesmaster' in group_names"
+
+- import_tasks: agent-config.yml
+  when: "'ec2instancesworker' in group_names"
+
+
+# CIS mode
+- import_tasks: cis-profile.yml
+  when: rke2_cis_mode
+
+#need to add when role==master
+- import_tasks: rke2-master.yml
+  when: "'ec2instancesinitmaster' in group_names"
+
+- import_tasks: rke2-master-additions.yml
+  when: "'ec2instancesmaster' in group_names"
+
+- import_tasks: rke2-agent.yml
+  when: "'ec2instancesworker' in group_names"
+
+- import_tasks: kubectl-install.yml
+  when: "'ec2instancesinitmaster' in group_names"
+
+- import_tasks: kubectl-install.yml
+  when: "'ec2instancesinitmaster' in group_names"
+
+- import_tasks: kubectl-config.yml
+  when: "'ec2instancesinitmaster' in group_names"

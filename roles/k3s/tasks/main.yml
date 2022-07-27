@@ -1,0 +1,14 @@
+---
+# tasks file for k3s
+
+- name: install k3s
+  shell:
+    cmd: curl -sfL https://get.k3s.io | sh -s - server --datastore-endpoint='postgres://{{ postgres_user }}:{{ postgres_password }}@{{ postgres_endpoint }}/kubernetes'
+  when: "'rancher' in group_names"
+
+- import_tasks: kubectl-install.yml
+  when: "'rancher' in group_names"
+
+- import_tasks: kubectl-config.yml
+  when: "'rancher' in group_names"
+

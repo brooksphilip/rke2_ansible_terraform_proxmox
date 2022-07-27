@@ -1,0 +1,87 @@
+---
+- hosts: localhost
+  name: Create AWS infrastructure with Terraforms
+  vars:
+    terraform_dir: <terraform_location>
+ 
+  tasks:
+    - name: Terraform Apply
+      terraform:
+        project_path: "{{ terraform_dir }}"
+        state: present
+      register: outputs
+
+    - name: debug
+      debug:
+        msg: "{{ outputs }}"
+ 
+    - name: Create Master Group
+      add_host: 
+        name: "{{ outputs.outputs.init_master_address.value }}"
+        groups: ec2instancesinitmaster
+
+    - name: Create Worker Group
+      add_host: 
+        name: "{{ outputs.outputs.worker1_address.value }}"
+        groups: ec2instancesworker
+
+    - name: Create Worker Group
+      add_host: 
+        name: "{{ outputs.outputs.worker2_address.value }}"
+        groups: ec2instancesworker
+
+    - name: Add masters to ec2 group_names
+      add_host:
+        name: "{{ outputs.outputs.init_master_address.value }}"
+        groups: ec2instances
+     
+
+    - name: Add masters to ec2 group_names
+      add_host:
+        name: "{{ outputs.outputs.worker1_address.value }}"
+        groups: ec2instances
+
+   
+    - name: Add rancher instance to rancher group
+      add_host:
+        name: "{{ outputs.outputs.init_master_address.value }}"
+        groups: rancher
+    
+
+    - name: debug
+      debug:
+        msg: "{{ groups }}"
+
+
+- hosts: ec2instances
+  name: Install RKE2
+  user: philip
+  become: yes
+  gather_facts: false
+  # vars_files:
+  #   - ./vars/main.yml
+
+ 
+  pre_tasks:
+    - name: Testing Connection
+      wait_for_connection:
+        delay: 20
+        timeout: 600
+
+    #- name: Testing
+    #  debug:
+    #    msg: "{{ init_master }}"
+
+#    - name: Register to Redhat 
+#      redhat_subscription:
+#        state: present
+#        username: "{{ redhat_user }}"
+#        password: "{{ redhat_password }}"
+#        auto_attach: true
+
+    - debug:
+        var=hostvars[inventory_hostname]
+
+  roles: 
+    - rke2
+
